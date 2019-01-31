@@ -9,24 +9,22 @@ class Point {
 
         this.pos_mat = Point.posMat(position);
 
-        this.orig_pos_mat = this.pos_mat;
-
-        this.x = this.pos_mat.arr[0][0];
-        this.y = this.pos_mat.arr[1][0];
+        this.orig_pos_mat = this.pos_mat.copy();
     }
 
     transform (matrix) {
-        this.pos_mat = Point.transform(this.orig_pos_mat, matrix).pos_mat;
-        this.update_xy();
+        this.pos_mat = Point.transform(this.pos_mat, matrix).pos_mat;
+    }
+
+    translate (coordinates) {
+        this.pos_mat = Point.translate(this.pos_mat, coordinates).pos_mat;
     }
 
     draw () {
         point(this.x, this.y);
     }
-
-    update_xy () {
-        this.x = this.pos_mat.arr[0][0];
-        this.y = this.pos_mat.arr[1][0];
+    copy () {
+        return new Point(this.pos_mat.copy());
     }
 
     get time () {
@@ -34,6 +32,18 @@ class Point {
     }
     get space () {
         return this.y;
+    }
+    get x () {
+        return this.pos_mat.arr[0][0]
+    }
+    get y () {
+        return this.pos_mat.arr[1][0];
+    }
+    set x (value) {
+        this.pos_mat.arr[0][0] = value;
+    }
+    set y (value) {
+        this.pos_mat.arr[1][0] = value;
     }
     static transform (point, matrix) {
         if (point instanceof Point) {
@@ -44,9 +54,24 @@ class Point {
 
         return new Point(Matrix.dot(matrix, point));
     }
+    static translate (point, coordinates) {
+        point = Point.posMat(point);
+        coordinates = Point.posMat(coordinates);
+
+        return new Point(Matrix.add(point, coordinates));
+    }
+    static sub (p1, p2) {
+        p1 = Point.posMat(p1);
+        p2 = Point.posMat(p2);
+
+        return new Point(Matrix.subtract(p1, p2))
+    }
     static posMat (position) {
+        // If position is a point.
+        if (position instanceof Point) { return position.pos_mat; }
+
         // If is a 1D array, make it 2D
-        if (typeof(position) === "object" && position.length !== undefined) { position = [position]; }
+        if (typeof(position) === "object" && position.length !== undefined && position[0].length === undefined) { position = [position]; }
 
         let pos_mat = Matrix.toMatrix(position);
 

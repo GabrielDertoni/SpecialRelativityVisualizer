@@ -53,6 +53,14 @@ class Matrix {
     }
 
     /**
+     * Copies each element of this matrix to a new one.
+     * @returns {Matrix} The copied matrix.
+     */
+    copy () {
+        return Matrix.copy(this);
+    }
+
+    /**
      * Returns the matrix transpose.
      * @returns {Matrix} A new matrix equal to the transpose of this matrix.
      */
@@ -203,6 +211,106 @@ class Matrix {
     }
 
     /**
+     * Adds the matrices bit-wise.
+     * @param {(Matrix|p5.Vector|number[][]|number)} [mat1] - First matrix or number.
+     * @param {(Matrix|p5.Vector|number[][]|number)} [mat2] - Second matrix or number.
+     * @param {boolean} [print_error=true] - Whether or not to print the error messages.
+     * @returns {Matrix} The resulting product matrix.
+     */
+    static add (mat1, mat2, print_error=true) {
+        if (typeof(mat1) === "number") {
+            if (typeof(mat2) === "number") {
+                if (print_error) { console.warn('Both arguments are numbers.'); }
+                return mat1 + mat2;
+            }
+            buff = mat1;
+            mat1 = mat2;
+            mat2 = buff;
+        }
+        if (typeof(mat2) === "number") {
+            mat1 = Matrix.toMatrix(mat1);
+            let result = Array(mat1.shape[0]);
+            for (let i in mat1.arr) {
+                result[i] = [];
+                for (let j in mat1.arr[i]) {
+                    result[i].push(mat1.arr[i][j] + mat2);
+                }
+            }
+            return new Matrix(result);
+        } else {
+            mat1 = Matrix.toMatrix(mat1);
+            mat2 = Matrix.toMatrix(mat2);
+
+            if (mat1.shape[0] !== mat2.shape[0] || mat1.shape[1] !== mat2.shape[1]) {
+                if (print_error) { console.error('Error: Matrices must have equal shape.'); }
+                return null;
+            }
+
+            let result = Array(mat1.shape[0]);
+            for (let i in mat1.arr) {
+                result[i] = [];
+                for (let j in mat1.arr[i]) {
+                    result[i].push(mat1.arr[i][j] + mat2.arr[i][j]);
+                }
+            }
+            return new Matrix(result);
+        }
+    }
+
+    /**
+     * Subtracts the second matrix from the first bit-wise.
+     * @param {(Matrix|p5.Vector|number[][]|number)} [mat1] - First matrix or number.
+     * @param {(Matrix|p5.Vector|number[][]|number)} [mat2] - Second matrix or number.
+     * @param {boolean} [print_error=true] - Whether or not to print the error messages.
+     * @returns {Matrix} The resulting product matrix.
+     */
+    static subtract (mat1, mat2, print_error=true) {
+        if (typeof(mat1) === "number") {
+            if (typeof(mat2) === "number") {
+                if (print_error) { console.warn('Both arguments are numbers, no mtrices found.'); }
+                return mat1 - mat2;
+            }
+
+            mat2 = Matrix.toMatrix(mat2);
+            let result = Array(mat2.shape[0]);
+            for (let i in mat2.arr) {
+                result[i] = [];
+                for (let j in mat2.arr[i]) {
+                    result[i].push(mat1 - mat2.arr[i][j]);
+                }
+            }
+            return new Matrix(result);
+        } else if (typeof(mat2) === "number") {
+            mat1 = Matrix.toMatrix(mat1);
+            let result = Array(mat1.shape[0]);
+            for (let i in mat1.arr) {
+                result[i] = [];
+                for (let j in mat1.arr[i]) {
+                    result[i].push(mat1.arr[i][j] - mat2);
+                }
+            }
+            return new Matrix(result);
+        } else {
+            mat1 = Matrix.toMatrix(mat1);
+            mat2 = Matrix.toMatrix(mat2);
+
+            if (mat1.shape[0] !== mat2.shape[0] || mat1.shape[1] !== mat2.shape[1]) {
+                if (print_error) { console.error('Error: Matrices must have equal shape.'); }
+                return null;
+            }
+
+            let result = Array(mat1.shape[0]);
+            for (let i in mat1.arr) {
+                result[i] = [];
+                for (let j in mat1.arr[i]) {
+                    result[i].push(mat1.arr[i][j] - mat2.arr[i][j]);
+                }
+            }
+            return new Matrix(result);
+        }
+    }
+
+    /**
      * Slices the matrix in a smaller one.
      * @param {(Matrix|p5.Vector|number[][])} [mat] - Matrix to slice.
      * @param {int[][]|string[]} [cut] - Where to slice in each dimention.
@@ -290,6 +398,22 @@ class Matrix {
             console.error('Error: "mat" not a Matrix, p5.Vector or number[][].');
         }
         return null;
+    }
+
+    /**
+     * Copies each element of the given matrix to a new one.
+     * @param {(Matrix|p5.Vector|number[][])} [mat] - Matrix to copy from.
+     * @returns {Matrix} The copied matrix.
+     */
+    static copy (mat) {
+        let copyArr = Array(mat.shape[0]);
+        for (let i in mat.arr) {
+            copyArr[i] = [];
+            for (let j in mat.arr[i]) {
+                copyArr[i].push(mat.arr[i][j]);
+            }
+        }
+        return new Matrix(copyArr);
     }
 
     /**

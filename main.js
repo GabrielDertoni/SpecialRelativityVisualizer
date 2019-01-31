@@ -19,6 +19,9 @@ transform_root = undefined;
 // Original inverse transform matrix.
 inverse_transform_root = undefined;
 
+// Original origin.
+root_origin = undefined;
+
 // Global test point
 p_test = new Point(300, 0);
 p_test2 = undefined;
@@ -35,13 +38,14 @@ function setup() {
 
     ////////////////// Define all vectors //////////////////
 
-    origin = createVector(0, cnv.height / 2);
+    origin = new Point(createVector(0, cnv.height / 2));
 
     j_hat = createVector(1, 1);
     i_hat = createVector(1, -1);
 
     transform_root = get_transform_matrix();
     inverse_transform_root = get_inverse_transform_matrix();
+    root_origin = origin.copy();
 
     p_test2 = new Point(Matrix.dot(get_inverse_transform_matrix(), p_test.orig_pos_mat));
 
@@ -97,12 +101,22 @@ function draw() {
 
     // Draw path points
     let transform_matrix = get_transform_matrix();
+    let delta_origin = new Point(0, Point.sub(origin.orig_pos_mat, origin.pos_mat).y);
     for (let i in points) {
         points[i].transform(transform_matrix);
+        points[i].translate(delta_origin);
 
         stroke(0);
         strokeWeight(5);
         points[i].draw();
+
+    }
+
+    // origin.x -= 0.1;
+
+    // Clear all transformations
+    for (let i in points) {
+        points[i].pos_mat = points[i].orig_pos_mat;
 
     }
 }
@@ -192,7 +206,7 @@ function draw_grid (size) {
  * Draws the line that represents the path of the current frame of reference.
  */
 function draw_reference_line () {
-    line(0, 0, cnv.width, 0);
+    line(0, 0, cnv.width - origin.x, 0);
 }
 
 /**
